@@ -9,8 +9,6 @@ public class ResponseData<T> {
         this.error = error;
     }
 
-
-
     public T getData() {
         return data;
     }

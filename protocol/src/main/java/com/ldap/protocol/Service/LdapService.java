@@ -1,101 +1,100 @@
 package com.ldap.protocol.Service;
 
-import org.springframework.ldap.core.AttributesMapper;
-import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.naming.NamingEnumeration;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import java.util.ArrayList;
-import java.util.List;
-//@Service
-//public class LdapService {
-//
-//    private final LdapTemplate ldapTemplate;
-//
-//    public LdapService(LdapTemplate ldapTemplate) {
-//        this.ldapTemplate = ldapTemplate;
-//    }
-//
-//    public List<String> getAuthoritiesForUser(String username) {
-//        List<String> authorities = new ArrayList<>();
-//
-//        // Set up the search controls
-//        SearchControls controls = new SearchControls();
-//        controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-//
-//        // Search for the user in LDAP using a filter (sAMAccountName is specific to Active Directory)
-//        NamingEnumeration<SearchResult> results = ldapTemplate.search(
-//                "", "(sAMAccountName=" + username + ")", controls,
-//                (AttributesMapper<String>) attrs -> {
-//                    List<String> userGroups = new ArrayList<>();
-//                    Attribute memberOf = attrs.get("memberOf");
-//                    if (memberOf != null) {
-//                        NamingEnumeration<?> groups = memberOf.getAll();
-//                        while (groups.hasMore()) {
-//                            userGroups.add(groups.next().toString());
-//                        }
-//                    }
-//                    return userGroups;
-//                });
-//
-//        // Process the search results
-//        try {
-//            while (results.hasMore()) {
-//                List<String> userGroups = (List<String>) results.next();
-//                authorities.addAll(userGroups);
-//            }
-//        } catch (Exception e) {
-//            // Handle any exceptions
-//        }
-//
-//        return authorities;
-//    }
-//}
+import javax.naming.Context;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+import java.util.Hashtable;
+import javax.naming.AuthenticationException;
+
 
 @Service
 public class LdapService {
 
-    private final LdapTemplate ldapTemplate;
+//    private static final
+    String LDAP_URL = "ldap://34.67.239.153";
+//    private static final
+    String LDAP_BASE_DN = "dc=server403,dc=com";
 
-    public LdapService(LdapTemplate ldapTemplate) {
-        this.ldapTemplate = ldapTemplate;
+
+//    public boolean authenticate(String username, String password) {
+//        try {
+//            Hashtable<String, String> env = new Hashtable<>();
+//            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+//            env.put(Context.PROVIDER_URL, LDAP_URL);
+//            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+//            env.put(Context.SECURITY_PRINCIPAL, "uid=" + username + "," + LDAP_BASE_DN);
+//            env.put(Context.SECURITY_CREDENTIALS, password);
+//
+//            DirContext context = new InitialDirContext(env);
+//            context.close();
+//            return true;
+//        } catch (NamingException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+
+
+    public boolean authenticate(String username, String password) {
+        try {
+            Hashtable<String, String> env = new Hashtable<>();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.PROVIDER_URL, LDAP_URL);
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, "uid=" + username + "," + LDAP_BASE_DN);
+            env.put(Context.SECURITY_CREDENTIALS, password);
+
+            DirContext context = new InitialDirContext(env);
+            context.close();
+            return true;
+        } catch (AuthenticationException e) {
+            e.printStackTrace();
+            return false;
+        } catch (NamingException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    public List<String> getAuthoritiesForUser(String username) {
-        List<String> authorities = new ArrayList<>();
 
-        SearchControls controls = new SearchControls();
-        controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        NamingEnumeration<javax.naming.directory.SearchResult> results = (NamingEnumeration<SearchResult>) ldapTemplate.search(
-                "", "(sAMAccountName=" + username + ")", controls,
-                (AttributesMapper<List<String>>) attrs -> {
-                    List<String> userGroups = new ArrayList<>();
-                    Attribute memberOf = attrs.get("memberOf");
-                    if (memberOf != null) {
-                        NamingEnumeration<?> groups = memberOf.getAll();
-                        while (groups.hasMore()) {
-                            String group = groups.next().toString();
-                            // Extract only the group/role name from the full DN if needed
-                            // Add logic to extract just the group/role name if required
-                            userGroups.add(group);
-                        }
-                    }
-                    return userGroups;
-                });
-
+    private String getUserAttribute(String username, String attribute) {
         try {
-            while (results.hasMore()) {
-                List<String> userGroups = (List<String>) results.next();
-                authorities.addAll(userGroups);
-            }
-        } catch (Exception e) {
-            // Handle any exceptions
-        }
+            Hashtable<String, String> env = new Hashtable<>();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.PROVIDER_URL, LDAP_URL);
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, "uid=" + username + "," + LDAP_BASE_DN);
+//            env.put(Context.SECURITY_CREDENTIALS, "Xi5peHj[4z01K1V]");
 
-        return authorities;
+            DirContext context = new InitialDirContext(env);
+
+            // Retrieve user's attributes
+            Attributes attributes = context.getAttributes("");
+            String userAttribute = attributes.get(attribute).get().toString();
+            context.close();
+            return userAttribute;
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getFirstName(String username) {
+        return getUserAttribute(username, "givenName");
+    }
+
+    public String getLastName(String username) {
+        return getUserAttribute(username, "sn");
     }
 }
+
+
+
+
+
+

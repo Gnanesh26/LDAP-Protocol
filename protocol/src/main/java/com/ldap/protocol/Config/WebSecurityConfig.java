@@ -3,7 +3,6 @@ package com.ldap.protocol.Config;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,7 +13,6 @@ import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAu
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
-
 
 
 @Configuration
@@ -29,7 +27,7 @@ public class WebSecurityConfig implements SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        configurer-> {
+                        configurer -> {
                             configurer
                                     .requestMatchers(String.valueOf(PathRequest.toStaticResources().atCommonLocations())).permitAll()
                                     .requestMatchers("/ldap", "/login").permitAll()
@@ -45,7 +43,6 @@ public class WebSecurityConfig implements SecurityConfig {
 
         return httpSecurity.build();
     }
-
 
 
     @Bean
@@ -68,20 +65,18 @@ public class WebSecurityConfig implements SecurityConfig {
 //        return new JwtAuthenticationFilter(authenticationManager());
 //    }
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        return new JwtAuthenticationFilter(authenticationManager());
-    }
-
-
+    //    @Bean
+//    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+//        return new JwtAuthenticationFilter(authenticationManager());
+//    }
+//
+//
     private JwtTokenProvider authenticationManager() {
-        return null;
+        return new JwtTokenProvider();
     }
 
 //    @Bean
 //    public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
 //        return new JwtAuthenticationFilter((JwtTokenProvider) authenticationManager);
 //    }
-
-
 }

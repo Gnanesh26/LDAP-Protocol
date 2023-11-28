@@ -33,14 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 String username = jwtTokenProvider.extractUsername(token);
 
-                // Fetch authorities (roles/groups) from LDAP service for the user
-                List<String> authorities = ldapService.getAuthoritiesForUser(username);
+//                // Fetch authorities (roles/groups) from LDAP service for the user
+//                List<String> authorities = ldapService.getAuthoritiesForUser(username);
 
                 // Create an AuthenticationToken with authorities obtained from LDAP
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        username, null, authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
-                );
-                SecurityContextHolder.getContext().setAuthentication(auth);
+//                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+//                        username, null, authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
+//                );
+//                SecurityContextHolder.getContext().setAuthentication(auth);
             }
 
         } catch (Exception ex) {
